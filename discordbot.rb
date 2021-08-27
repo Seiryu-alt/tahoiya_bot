@@ -24,8 +24,7 @@ bot.command(:tahoiya) do |event, *args|
   asker = event.user
   subject = args.join(' ')
   tahoiya = Tahoiya.new(asker: asker, subject: subject)
-  message = tahoiya.send_subject(channel: event.channel)
-  message.react(OK_MARK)
+  tahoiya.send_subject(channel: event.channel)
   event.message.delete
 end
 
@@ -50,7 +49,8 @@ end
 bot.reaction_add(emoji: CHECK_MARK) do |event|
   message = event.message
   if message.from_bot? && !message.my_reactions.empty?
-    Tahoiya.current.send_answer(channel: event.channel)
+    Tahoiya.current.send_answer(channel: event.channel, message: message)
+    event.message.delete_all_reactions
   end
 end
 

@@ -9,13 +9,14 @@ class Tahoiya
   end
 
   def send_subject(channel:)
-    channel.send_embed do |embed|
+    message = channel.send_embed do |embed|
       embed.title = 'お題'
       embed.description = @subject
       embed.author = Discordrb::Webhooks::EmbedAuthor.new(name: @asker.name, icon_url: @asker.avatar_url)
-      embed.footer = Discordrb::Webhooks::EmbedFooter.new(text: "全員の提出が終わったら#{OK_MARK}をクリック")
+      embed.footer = Discordrb::Webhooks::EmbedFooter.new(text: "たほいやBOTにDMで回答（出題者は答え）を送信しよう\n全員の回答が終わったら#{OK_MARK}をクリック")
       embed.color = MESSAGE_COLORS[0]
     end
+    message.react(OK_MARK)
   end
 
   def send_descriptions(channel:)
@@ -36,18 +37,22 @@ class Tahoiya
     message.react(CHECK_MARK)
   end
 
-  def send_answer(channel:)
+  def send_answer(channel:, message:)
+    reactions = message.reactions
+    @answers.each_with_index do |answer, i|
+      answer[:votes] = reactions[NUMBER_EMOJI[i]].count-1
+    end
+
     channel.send_embed do |embed|
       embed.author = Discordrb::Webhooks::EmbedAuthor.new(name: @asker.name, icon_url: @asker.avatar_url)
       embed.title = '答え'
       embed.description = @answers.map.with_index{ |answer, i|
-        if answer[:user] == @asker
-          "#{NUMBER_EMOJI[i]} 本物"
+        if answer[:correct]
+          "#{NUMBER_EMOJI[i]} 本物 (#{answer[:votes]}票)"
         else
-          "#{NUMBER_EMOJI[i]} #{answer[:user].name}"
+          "#{NUMBER_EMOJI[i]} #{answer[:user].name}  (#{answer[:votes]}票)"
         end
       }.join("\n")
-
       embed.color = MESSAGE_COLORS[2]
     end
   end
@@ -57,7 +62,11 @@ class Tahoiya
     if current_answer
       current_answer[:body] = body
     else
-      @answers.push({user: user, body: body})
+      if user == @asker
+        @answers.push({user: user, body: body, correct: true})
+      else
+        @answers.push({user: user, body: body, correct: false})
+      end
     end
   end
 
