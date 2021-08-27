@@ -14,7 +14,7 @@ class Tahoiya
       embed.description = @subject
       embed.author = Discordrb::Webhooks::EmbedAuthor.new(name: @asker.name, icon_url: @asker.avatar_url)
       embed.footer = Discordrb::Webhooks::EmbedFooter.new(text: "全員の提出が終わったら#{OK_MARK}をクリック")
-      embed.color = '#ff0000'
+      embed.color = MESSAGE_COLORS[0]
     end
   end
 
@@ -23,16 +23,15 @@ class Tahoiya
     message = channel.send_embed do |embed|
       embed.author = Discordrb::Webhooks::EmbedAuthor.new(name: @asker.name, icon_url: @asker.avatar_url)
       embed.title = '本物はどれ？'
-      embed.description = ""
-      @answers.each_with_index do |answer, i|
-        embed.description += "#{ALPHABET_EMOJI[i]} #{answer[:body]}\n"
-      end
+      embed.description =  @answers.map.with_index{ |answer, i|
+        "#{NUMBER_EMOJI[i]} #{answer[:body]}"
+      }.join("\n")
       embed.footer = Discordrb::Webhooks::EmbedFooter.new(text: "全員の投票が終わったら#{CHECK_MARK}をクリック")
-      embed.color = '#ffff00'
+      embed.color = MESSAGE_COLORS[1]
     end
 
     @answers.size.times do |n|
-      message.react(ALPHABET_EMOJI[n])
+      message.react(NUMBER_EMOJI[n])
     end
     message.react(CHECK_MARK)
   end
@@ -41,16 +40,15 @@ class Tahoiya
     channel.send_embed do |embed|
       embed.author = Discordrb::Webhooks::EmbedAuthor.new(name: @asker.name, icon_url: @asker.avatar_url)
       embed.title = '答え'
-      embed.description = ""
-      @answers.each_with_index do |answer, i|
+      embed.description = @answers.map.with_index{ |answer, i|
         if answer[:user] == @asker
-          user_name = "本物"
+          "#{NUMBER_EMOJI[i]} 本物"
         else
-          user_name = answer[:user].name
+          "#{NUMBER_EMOJI[i]} #{answer[:user].name}"
         end
-        embed.description += "#{ALPHABET_EMOJI[i]} #{user_name}\n"
-      end
-      embed.color = "#00ff7f"
+      }.join("\n")
+
+      embed.color = MESSAGE_COLORS[2]
     end
   end
 
