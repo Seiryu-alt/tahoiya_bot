@@ -20,7 +20,7 @@ MESSAGE_COLORS.freeze
 
 bot = Discordrb::Commands::CommandBot.new token: TOKEN, prefix: '/'
 
-bot.command(:tahoiya) do |event, *args|
+bot.command(:tahoiya, aliases: [:たほいや]) do |event, *args|
   asker = event.author
   subject = args.join(' ')
   tahoiya = Tahoiya.new(asker: asker, subject: subject, channel: event.channel)
