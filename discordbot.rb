@@ -15,7 +15,7 @@ NUMBER_EMOJI = []
   NUMBER_EMOJI.push( "#{n+1}#{BASECODE}" )
 end
 NUMBER_EMOJI.freeze
-MESSAGE_COLORS = ['#ff0000', '#ffff00', '#00ff7f', '#0000ff']
+MESSAGE_COLORS = ['#ff0000', '#ffff00', '#00ff7f', '#0000ff', '#ff1493']
 MESSAGE_COLORS.freeze
 
 bot = Discordrb::Commands::CommandBot.new token: TOKEN, prefix: '/'
@@ -41,8 +41,9 @@ end
 bot.reaction_add(emoji: OK_MARK) do |event|
   message = event.message
   if message.from_bot? && !message.my_reactions.empty?
-    Tahoiya.current.send_descriptions
-    event.message.delete_all_reactions
+    if Tahoiya.current.send_descriptions
+      event.message.delete_all_reactions
+    end
   end
 end
 
